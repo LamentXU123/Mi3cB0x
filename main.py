@@ -2,9 +2,9 @@
 # @FileName  :main.py
 # @Time      :2024/01/08 17:55:42
 # @Author    :LamentXU
-import time, os, binascii, tools, stegano
+import time, binascii, tools, stegano
 
-from sys import exit
+import os.path as op
 from rich import print
 from rich.console import Console
 # from rich.style import Style
@@ -12,14 +12,13 @@ from rich.table import Table
 from json import load
 from PIL import Image
 from PIL.ExifTags import TAGS
-from os.path import dirname, abspath
 VERSION = 'v0.1'
 console = Console()
-PATH = dirname(abspath(__file__))
+PATH = op.dirname(op.abspath(__file__))
 def is_image(file_path):
-    if not os.path.exists(file_path):
+    if not op.exists(file_path):
         return False
-    _, extension = os.path.splitext(file_path)
+    _, extension = op.splitext(file_path)
     supported_extensions = ['.jpg', '.jpeg', '.png', '.gif']
     if extension.lower() not in supported_extensions:
         return False
@@ -114,7 +113,6 @@ def _print(string, print_type='normal'):
         raise NameError('Unknown print type {}'.format(print_type))
 
 def check_for_flag(string):
-    
     try:
         for flag_format in FLAG:
             start_index = string.find(flag_format)
@@ -122,8 +120,7 @@ def check_for_flag(string):
                 continue
             else:
                 end_index = string.find("}", start_index)
-                if end_index == -1:
-                    status.stop()
+                if end_index == -1 and '{' in flag_format:
                     _print("Flag found, but somehow there is no '}' in flag, printout the whole string", print_type='warning')
                     flag_string = string[start_index:]
                     if len(flag_string) >= 50:
@@ -132,10 +129,13 @@ def check_for_flag(string):
                     is_continue()
                     status.start()
                     return False
+                elif '{' not in flag_format:
+                    _print('Flag found, not no "{}" in flag format, print out all the string where flag was found')
+                    flag_value = string
                 else:
                     # 输出 flag 值
                     flag_value = string[start_index:end_index+1]
-                    return flag_value
+                return flag_value
     except:
         return False
     return False
@@ -184,17 +184,31 @@ menu = rf'''
 '''
 if __name__ == '__main__':
     try:
-        with open('Flags.json') as f:
-            FLAG = load(f)['FLAG']
-    except Exception as e:
-        _print('Fail to load Flags.json, set your own flag dict or download it from github') #TODO
-    try:
+        try:
+            with open('Flags.json') as f:
+                FLAG = load(f)['FLAG']
+        except Exception as e:
+            _print('Fail to load Flags.json, print out the error : {}'.format(e), print_type='error')
+            _print('You can set your own flag dict or download it from https://github.com/Duweilin/Mi3cB0x/blob/main/Flags.json', print_type='warning')
+            _ = console.input('Download https://github.com/Duweilin/Mi3cB0x/blob/main/Flags.json to fix the problem?(y/n): >>> ')
+            if _ == 'Y' or _ == 'y' or _ == 'yes' or _ == 'YES' or not _:
+                import urllib.request
+                try:
+                    url = "https://raw.githubusercontent.com/username/repository/master/file.txt"  # 替换为实际的文件URL
+                    save_path = op.join(PATH, 'Flags.json')  
+                    urllib.request.urlretrieve(url, save_path)
+                except:
+                    console.print_exception()
+                    _print('Download failed, please check your network', print_type='warning')
+                    quit()
+            else:
+                quit()
         print(f'[b cyan]{menu}[/b cyan]')
         global status, MAIN_image
         MAIN_image = console.input('Please input the image location: >>> ')
         if not is_image(MAIN_image):
             _print('Image does not exist or not have a supported extensions', print_type='error')
-            exit()
+            quit()
         else:
             with console.status('Reading image') as status:
                 image_content = get_image_content()
@@ -217,6 +231,18 @@ if __name__ == '__main__':
                 if not flag_found:
                     _print('No flag found in image info')
                 status.start()
+                status.update('Checking if the image is a QR code......')
+                res = tools.decode_QRcode(img_in_PIL)
+                status.stop()
+                if res:
+                    flag_value= check_for_flag(res)
+                    if flag_value:
+                        _print([flag_value, 'QR code'], print_type='flag')
+                    else:
+                        _print('QR code detected, but no flag, QR code message: {}'.format(res), print_type='warning')
+                else:
+                    _print('No QR code detected')
+                status.start()
                 status.update('Reading image hex, converting it into ascii......')
                 hex_str = binascii.hexlify(image_content).decode('utf-8')
                 ascii_str = ''.join(chr(byte) if 31 < byte < 127 else '.' for byte in image_content)
@@ -230,7 +256,7 @@ if __name__ == '__main__':
                 try:
                     lsb_ste = stegano.lsb.reveal(img_in_PIL)
                     if lsb_ste:
-                        _print('LSB STEGANO FOUND, message({})'.format(lsb_ste))
+                        _print('LSB STEGANO FOUND, message: {}'.format(lsb_ste))
                         flag = check_for_flag(lsb_ste)
                         if flag:
                             _print([flag, 'LSB Stegano'], print_type='flag')
@@ -240,8 +266,8 @@ if __name__ == '__main__':
                     else:
                         _print('No lsb setgano found')
                 except:
-                    _print('No lsb setgano found')
-                status.update('Now finding embedded files......')
+                    _print('No lsb stegano found')
+                status.update('Finding embedded files......')
                 status.start()
                 result = tools.find_embedded_files(MAIN_image)
                 status.stop()
@@ -266,7 +292,9 @@ if __name__ == '__main__':
                         i += 1
                 else:
                     _print('No embedded file found')
+    except SystemExit:
+        pass
     except:
         console.print_exception()
-    finally:
-        _print('Exit')
+    else:
+        _print('Finished')

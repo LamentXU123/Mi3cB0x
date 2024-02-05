@@ -1,10 +1,15 @@
 import zlib
 import struct
 import zipfile
-# import magic
-# from PyPDF2 import PdfFileReader
 import struct
+from pyzbar import pyzbar
 from PIL import Image
+def decode_QRcode(PIL_image):
+    result = pyzbar.decode(PIL_image)
+    if not result:
+        return False
+    else:
+        return result[0].data
 def find_embedded_files(file_path):
     with open(file_path, 'rb') as f:
         data = f.read()
@@ -34,11 +39,18 @@ def find_embedded_files(file_path):
         if start_png == -1:
             break
 
-        # The IHDR chunk starts at byte 12
+        # Get the size of the PNG file
         size_offset = start_png + 8
-        size = int.from_bytes(data[size_offset:size_offset+4], byteorder='big')
-        results.append(('PNG', start_png + 12, size))
-        offset = start_png + 12 + size + 4
+        size = 0
+        chunk_type = b'IHDR'
+        while chunk_type != b'IEND':
+            chunk_size = int.from_bytes(data[size_offset:size_offset+4], byteorder='big')
+            chunk_type = data[size_offset+4:size_offset+8]
+            size += chunk_size + 12  # Add 12 bytes for chunk type, length and CRC
+            size_offset += chunk_size + 12
+        
+        results.append(('PNG', start_png, size))
+        offset = start_png + size
 
     # Check for GIF files
     gif_header = b'\x47\x49\x46\x38' # GIF signature
@@ -58,9 +70,8 @@ def find_embedded_files(file_path):
         try:
             zip_file = zipfile.ZipFile(f)
             for file_info in zip_file.infolist():
-                print(zip_file.infolist)
                 start_zip = file_info.header_offset
-                results.append(('ZIP', start_zip, file_info.file_size))
+                results.append(('ZIP', start_zip, file_info.compress_size+file_info.header_offset))
         except:
             pass
 
@@ -170,6 +181,8 @@ def extract_embedded_files(file_path, embedded_files, file_num):
     with open(file_path, 'rb') as f:
         data = f.read()
         file_type, start_offset, size = embedded_files[0], embedded_files[1], embedded_files[2]
+        # if file_type == 'ZIP':
+        #     size = 100
         file_data = data[start_offset:start_offset+size]
         file_name = "File{}_{}_embedded_file.{}".format(file_num, file_type.lower(),file_type.lower())
         with open(file_name, 'wb') as f:
