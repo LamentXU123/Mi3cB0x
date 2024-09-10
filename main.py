@@ -2,9 +2,11 @@
 # @FileName  :main.py
 # @Time      :2024/01/08 17:55:42
 # @Author    :LamentXU
-import time, binascii, tools, stegano
+import time, binascii, tools
 
 import os.path as op
+from os import mkdir, chdir
+from shutil import rmtree, copyfile
 from rich import print
 from rich.console import Console
 # from rich.style import Style
@@ -55,8 +57,8 @@ def get_image_info(MAIN_image, image_content):
                 status.stop()
                 _print('IHDR DETECTED, real width : {}, height : {}'.format(str(w), str(h)))
                 tools.modify_ihdr(MAIN_image, 'output.png', w, h)
-                _print('IHDR MODIFYIED, new image location : {}\\output.png'.format(PATH), print_type='good')
-                _print('Look the new image, if still no flag, continue the script with the new image')
+                _print('IHDR MODIFYIED, new image location : {}\\output.png'.format(PATH), print_type='critical')
+                _print('Check the new image, if still no flag, continue the script with the new image')
             is_continue()
             MAIN_image = 'output.png'
             with open(MAIN_image, 'rb') as f:
@@ -95,7 +97,7 @@ def is_continue():
         _print('Now continue the script')
 def _print(string, print_type='normal'):
     if print_type == 'normal':
-        console.log("[b cyan][b blod]INFO[/b blod]        {}[/b cyan]".format(string))
+        console.log("[b blue][b blod]INFO[/b blod]        {}[/b blue]".format(string))
     elif print_type == 'flag':
         console.bell()
         console.log("[b green][b blod]FLAG        POSSIBLE FLAG [u][i]{}[/i][/u] FROM [i]{}[/i][/b blod][/b green]".format(string[0], string[1]))
@@ -107,8 +109,8 @@ def _print(string, print_type='normal'):
             "[b yellow][b blod]WARNING[/b blod]     {}[/b yellow]".format(string))
     elif print_type == 'error':
         console.log("[b red][b blod]ERROR[/b blod]       {}[/b red]".format(string))
-    elif print_type == 'good':
-        console.log("[b green][b blod]GOOD        {}[/b green][/b blod]".format(string))
+    elif print_type == 'critical':
+        console.log("[b cyan][b blod]CRITICAL    {}[/b cyan][/b blod]".format(string))
     else:
         raise NameError('Unknown print type {}'.format(print_type))
 
@@ -189,12 +191,12 @@ if __name__ == '__main__':
                 FLAG = load(f)['FLAG']
         except Exception as e:
             _print('Fail to load Flags.json, print out the error : {}'.format(e), print_type='error')
-            _print('You can set your own flag dict or download it from https://github.com/Duweilin/Mi3cB0x/blob/main/Flags.json', print_type='warning')
-            _ = console.input('Download https://github.com/Duweilin/Mi3cB0x/blob/main/Flags.json to fix the problem?(y/n): >>> ')
+            _print('You can set your own flag dict or download it from https://github.com/LamentXU123/Mi3cB0x/blob/main/Flags.json', print_type='warning')
+            _ = console.input('Download https://github.com/LamentXU123/Mi3cB0x/blob/main/Flags.json to fix the problem?(y/n): >>> ')
             if _ == 'Y' or _ == 'y' or _ == 'yes' or _ == 'YES' or not _:
                 import urllib.request
                 try:
-                    url = "https://raw.githubusercontent.com/username/repository/master/file.txt"  # 替换为实际的文件URL
+                    url = "https://raw.githubusercontent.com/LamentXU123/Mi3cB0x/master/Flags.json" 
                     save_path = op.join(PATH, 'Flags.json')  
                     urllib.request.urlretrieve(url, save_path)
                 except:
@@ -210,6 +212,17 @@ if __name__ == '__main__':
             _print('Image does not exist or not have a supported extensions', print_type='error')
             quit()
         else:
+            dir_name = op.basename(MAIN_image)+'_extracted_'+str(int(time.time()))
+            if op.exists(dir_name):
+                _print('folder {}'.format(dir_name) + 'already exists', print_type='error')
+                _ = console.input('Do you want to overwrite it?(y/n): >>> ')
+                if _ == 'Y' or _ == 'y' or _ == 'yes' or _ == 'YES' or not _:
+                    rmtree(dir_name)
+                else:
+                    quit()
+            mkdir(dir_name)
+            copyfile(MAIN_image, op.join(dir_name, op.basename(MAIN_image)))
+            chdir(dir_name)
             with console.status('Reading image') as status:
                 image_content = get_image_content()
                 status.update('Checking the image info......')
@@ -251,24 +264,20 @@ if __name__ == '__main__':
                 if flag_value:
                     _print([flag_value, 'Image hex -> ascii string'], print_type='flag')
                 else:
-                    _print('Image hex read, converted it into ascii, no flag found')
+                    _print('Image hex read, converted it into chars by ascii, no flag found')
                 status.update('Checking lsb stegano......') 
-                try:
-                    lsb_ste = stegano.lsb.reveal(img_in_PIL)
-                    if lsb_ste:
-                        _print('LSB STEGANO FOUND, message: {}'.format(lsb_ste))
-                        flag = check_for_flag(lsb_ste)
-                        if flag:
-                            _print([flag, 'LSB Stegano'], print_type='flag')
-                        else:
-                            _print('LSB found, but no flag, please check it')
-                            is_continue()
-                    else:
-                        _print('No lsb setgano found')
-                except:
-                    _print('No lsb stegano found')
-                status.update('Finding embedded files......')
+                lsb_ste = tools.extract_lsb(MAIN_image)
+                _print('LSB bytes saved in file: /{}/lsb_bytes'.format(dir_name), print_type='critical')
+                with open('lsb_bytes', 'wb') as f:
+                    f.write(lsb_ste)
+                flag = check_for_flag(lsb_ste.decode('utf-8', errors='ignore'))
+                if flag:
+                    _print([flag, 'LSB Stegano'], print_type='flag')
+                else:    
+                    _print('LSB bytes extracted, but no flag found')
+                status.update('Finding possible embedded files......')
                 status.start()
+                mkdir('possibly_extracted')
                 result = tools.find_embedded_files(MAIN_image)
                 status.stop()
                 table = Table(show_header=True, header_style="bold magenta", title='embedded file info')
@@ -278,17 +287,17 @@ if __name__ == '__main__':
                 table.add_column('Size')
                 i = 0
                 for res in result:
-                    table.add_row('File'+str(i), res[0], str(res[1])+'B', str(res[2])+'B')
+                    table.add_row('./{}/possibly_extracted/File'.format(dir_name)+str(i), res[0], str(res[1])+'B', str(res[2])+'B')
                     i += 1
                 console.print(table)
                 if len(result) > 1:
-                    _print('EMBEDDED FILE FOUND, print out the result', 'good')
+                    _print('possible embedded file(s) found, print out the result')
                     status.update('Extracting file......')
                     status.start()
                     i = 0
                     for res in result:
                         filename, size = tools.extract_embedded_files(MAIN_image, res, i)
-                        _print("Extracted {} ({} bytes)".format(filename, size))
+                        _print("Extracted {} ({} bytes)".format(filename, size), print_type='critical')
                         i += 1
                 else:
                     _print('No embedded file found')
@@ -297,4 +306,6 @@ if __name__ == '__main__':
     except:
         console.print_exception()
     else:
-        _print('Finished')
+        _print('Finished, please check the output files in ./{} folder'.format(dir_name))
+    finally:
+        chdir(PATH)

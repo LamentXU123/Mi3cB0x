@@ -167,7 +167,7 @@ def extract_lsb(image_path):
     message_bits = ""
     for y in range(height):
         for x in range(width):
-            r, g, b = pixels[x, y]
+            r, g, b = pixels[x, y][0], pixels[x, y][1], pixels[x, y][2]
             message_bits += bin(r)[-1] + bin(g)[-1] + bin(b)[-1]
 
     # Convert message to bytes
@@ -184,7 +184,7 @@ def extract_embedded_files(file_path, embedded_files, file_num):
         # if file_type == 'ZIP':
         #     size = 100
         file_data = data[start_offset:start_offset+size]
-        file_name = "File{}_{}_embedded_file.{}".format(file_num, file_type.lower(),file_type.lower())
+        file_name = "./possibly_extracted/File{}_{}_embedded_file.{}".format(file_num, file_type.lower(),file_type.lower())
         with open(file_name, 'wb') as f:
             f.write(file_data)
 
