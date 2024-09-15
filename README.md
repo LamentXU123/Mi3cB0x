@@ -1,7 +1,7 @@
 <h1 align="center">Mi3cB0x -- Scan flags in your CTF misc image🚩!</h1>
 <em><h3 align="center">The easy and fast way to find flags in image</h3></em>
 <p align="center">
-<img src=https://github.com/LamentXU123/Mi3cB0x/images/profile.png>
+<img src=https://github.com/LamentXU123/Mi3cB0x/blob/main/images/profile.png>
 <img src=https://img.shields.io/badge/python-3.7+-blue?style=for-the-badge>
 <img src=https://img.shields.io/badge/License-MIT-green?style=for-the-badge>
 <img src=https://img.shields.io/badge/State-Developing-red?style=for-the-badge>
@@ -20,7 +20,7 @@
 * [python 3.7](https://python.org)
 * [PIL 10.1.0](https://github.com/python-pillow/Pillow)
 * [rich 13.7.0](https://github.com/Textualize/rich)
-* [pyzbar 0.1.9](https://github.com/NaturalHistoryMuseum/pyzbar)
+* [pyzbar 0.1.9](https://github.com/NaturalHistoryMuseum/pyzbar)  
 command to install all :
 ```sh
 pip install -r requirements.txt
@@ -39,7 +39,8 @@ python main.py
 ```
 
 😈**Usage**  
-<em>***Be easy, All you need to do is to launch the script and input your image location!***</em>
+<em>***Be easy, All you need to do is to launch the script and input your image location!***</em>  
+**DON'T FORGET TO SET YOUR OWN FLAG FORMAT IN THE CTF COMPETITION IN Flag.json**
 
      
 ## 🦸Maintainers
