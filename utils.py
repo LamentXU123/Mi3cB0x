@@ -280,7 +280,7 @@ def detect_image_format(image_path):
         else:
             correct_format = max(format_score, key=format_score.get)
             need_fix = True
-            _print("It might br a {} file, but the header is not correct".format(correct_format), print_type='critical')
+            _print("It might be a {} file, but the header is not correct".format(correct_format), print_type='critical')
             return correct_format, need_fix
 
 
