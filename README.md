@@ -8,9 +8,9 @@
 <em><h5 align="center">a script to analyze image and scan flags under python3</h5></em>
 
 ## 📸Highlights
-* 🛎️Great CTF problem solving assistant
+* 🛎️Great CTF challenge solving assistant
 * 😜Very easy to use  
-* 🌞solve image problem quickly and efficiently
+* 🌞solve image challenge quickly and efficiently
 * 🌐Support exif, lsb, embedded file and other steganography
 
 ## 📕Getting started
@@ -22,12 +22,12 @@
 * [pyzbar 0.1.9](https://github.com/NaturalHistoryMuseum/pyzbar)
 command to install all :
 ```sh
-pip install pillow==10.1.0 rich==13.7.0 pyzbar==0.1.9
+pip install -r requirements.txt
 ```
 👋**Install & Start**
 * Install
 ```sh
-git clone https://github.com/DWL-stu/Mi3cB0x.git
+git clone https://github.com/LamentXU123/Mi3cB0x.git
 ```
 * Start
 ```sh
