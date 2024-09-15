@@ -39,7 +39,8 @@ python main.py
 ```
 
 😈**Usage**  
-<em>***Be easy, All you need to do is to launch the script and input your image location!***</em>
+<em>***Be easy, All you need to do is to launch the script and input your image location!***</em>  
+**DON'T FORGET TO SET YOUR OWN FLAG FORMAT IN THE CTF COMPETITION IN Flag.json**
 
      
 ## 🦸Maintainers
