@@ -1,3 +1,4 @@
 pillow==10.4.0
 rich==13.7.1
 pyzbar==0.1.9
+python-levenshtein==0.25.1

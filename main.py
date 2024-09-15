@@ -14,7 +14,7 @@ from rich.table import Table
 from json import load
 from PIL import Image
 from PIL.ExifTags import TAGS
-VERSION = 'v0.1'
+VERSION = 'v0.3'
 PATH = op.dirname(op.abspath(__file__))
 console = Console()
 def is_image(file_path):
@@ -188,15 +188,12 @@ menu = rf'''
 
 
 
-███╗   ███╗██╗██████╗  ██████╗   ██████╗  ██████╗ ██╗  ██╗
-████╗ ████║██║╚════██╗██╔════╝   ██╔══██╗██╔═████╗╚██╗██╔╝
-██╔████╔██║██║ █████╔╝██║        ██████╔╝██║██╔██║ ╚███╔╝ 
-██║╚██╔╝██║██║ ╚═══██╗██║        ██╔══██╗████╔╝██║ ██╔██╗ 
-██║ ╚═╝ ██║██║██████╔╝╚██████╗   ██████╔╝╚██████╔╝██╔╝ ██╗
-╚═╝     ╚═╝╚═╝╚═════╝  ╚═════╝   ╚═════╝  ╚═════╝ ╚═╝  ╚═╝
-        
-----------------------[AUTHOR] LamentXU----------------------
-------------------------[Version] {VERSION}------------------------
+███╗   ███╗██╗██████╗  ██████╗   ██████╗  ██████╗ ██╗  ██╗   [*] Author: LamentXU
+████╗ ████║██║╚════██╗██╔════╝   ██╔══██╗██╔═████╗╚██╗██╔╝   [*] Blog: https://lamentxu.top
+██╔████╔██║██║ █████╔╝██║        ██████╔╝██║██╔██║ ╚███╔╝    [*] Github: https://github.com/LamentXU123/Mi3cB0x
+██║╚██╔╝██║██║ ╚═══██╗██║        ██╔══██╗████╔╝██║ ██╔██╗    [*] Team: EICS1
+██║ ╚═╝ ██║██║██████╔╝╚██████╗   ██████╔╝╚██████╔╝██╔╝ ██╗   [*] Version: {VERSION}
+╚═╝     ╚═╝╚═╝╚═════╝  ╚═════╝   ╚═════╝  ╚═════╝ ╚═╝  ╚═╝   [*] Email: lamentxu644@gmail.com
 
 /flag: I like cats (*/ω＼*), meow meow meow.
 '''
@@ -241,6 +238,7 @@ if __name__ == '__main__':
             mkdir(dir_name)
             copyfile(MAIN_image, op.join(dir_name, op.basename(MAIN_image)))
             chdir(dir_name)
+            Flag_decoder = decoder.Flag_Decoder(FLAG, dir_name)
             with console.status('Reading image') as status:
                 image_content = get_image_content()
                 status.update('Checking the image info......')
@@ -288,6 +286,9 @@ if __name__ == '__main__':
                 _print('LSB bytes saved in file: /{}/lsb_bytes'.format(dir_name), print_type='critical')
                 with open('lsb_bytes', 'wb') as f:
                     f.write(lsb_ste)
+                _ = Flag_decoder.solve_flag_by_bytes(lsb_ste, 'lsb_bytes')
+                if _:
+                    _print(_, print_type='critical')
                 flag = check_for_flag(lsb_ste.decode('utf-8', errors='ignore'))
                 if flag:
                     _print([flag, 'LSB Stegano'], print_type='flag')
