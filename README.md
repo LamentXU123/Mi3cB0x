@@ -20,7 +20,7 @@
 * [python 3.7](https://python.org)
 * [PIL 10.1.0](https://github.com/python-pillow/Pillow)
 * [rich 13.7.0](https://github.com/Textualize/rich)
-* [pyzbar 0.1.9](https://github.com/NaturalHistoryMuseum/pyzbar)
+* [pyzbar 0.1.9](https://github.com/NaturalHistoryMuseum/pyzbar)  
 command to install all :
 ```sh
 pip install -r requirements.txt
