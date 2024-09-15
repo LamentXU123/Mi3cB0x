@@ -1,7 +1,7 @@
 <h1 align="center">Mi3cB0x -- Scan flags in your CTF misc image🚩!</h1>
 <em><h3 align="center">The easy and fast way to find flags in image</h3></em>
 <p align="center">
-<img src=https://github.com/LamentXU123/Mi3cB0x/images/profile.png>
+<img src=https://github.com/LamentXU123/Mi3cB0x/blob/main/images/profile.png>
 <img src=https://img.shields.io/badge/python-3.7+-blue?style=for-the-badge>
 <img src=https://img.shields.io/badge/License-MIT-green?style=for-the-badge>
 <img src=https://img.shields.io/badge/State-Developing-red?style=for-the-badge>
