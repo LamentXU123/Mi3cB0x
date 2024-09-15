@@ -169,9 +169,12 @@ def extract_lsb(image_path):
     message_bits = ""
     for y in range(height):
         for x in range(width):
-            r, g, b = pixels[x, y][0], pixels[x, y][1], pixels[x, y][2]
-            message_bits += bin(r)[-1] + bin(g)[-1] + bin(b)[-1]
-
+            try:
+                r, g, b = pixels[x, y][0], pixels[x, y][1], pixels[x, y][2]
+                message_bits += bin(r)[-1] + bin(g)[-1] + bin(b)[-1]
+            except TypeError:
+                g = pixels[x, y]
+                message_bits += bin(g)[-1]
     # Convert message to bytes
     message_bytes = bytearray()
     for i in range(0, len(message_bits), 8):
