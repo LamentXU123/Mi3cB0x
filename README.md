@@ -23,7 +23,7 @@
 * [pyzbar 0.1.9](https://github.com/NaturalHistoryMuseum/pyzbar)  
 command to install all :
 ```sh
-pip install -r requirements.txt
+pip install -r requirments.txt
 ```
 👋**Install & Start**
 * Install
